@@ -1,24 +1,35 @@
-import axios from 'axios';
 
-export const API_URL = 'http://localhost:8000/api';
+
+
+
+
+// http/api.js - Add refresh token interceptor
+import axios from 'axios';
+import authService from '../services/authService';
+
+const BASE_URL = 'http://localhost:8000/api';
 
 const $api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true, // Important for cookies (refresh_token)
+  baseURL: BASE_URL,
+  withCredentials: true, // CRITICAL: This sends the refresh_token cookie
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-$api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// Request interceptor - Add access token to every request
+$api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-// Response interceptor for handling token refresh
+// Response interceptor - Handle token refresh
 $api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -29,24 +40,27 @@ $api.interceptors.response.use(
       originalRequest._retry = true;
       
       try {
-        // Attempt to refresh token
-        const response = await axios.post(
-          `${API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
+        // Try to refresh the token
+        const response = await authService.refreshToken();
         
-        const { access_token } = response.data;
-        localStorage.setItem('access_token', access_token);
-        
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${access_token}`;
-        return $api(originalRequest);
+        // Store new access token
+        if (response.data.access_token) {
+          localStorage.setItem('access_token', response.data.access_token);
+          
+          // Update user data if returned
+          if (response.data.user) {
+            localStorage.setItem('user', JSON.stringify(response.data.user));
+          }
+          
+          // Retry the original request with new token
+          originalRequest.headers.Authorization = `Bearer ${response.data.access_token}`;
+          return $api(originalRequest);
+        }
       } catch (refreshError) {
-        // Refresh failed - logout user
+        // Refresh failed - redirect to login
         localStorage.removeItem('access_token');
         localStorage.removeItem('user');
-        window.location.href = '/auth?mode=login';
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }

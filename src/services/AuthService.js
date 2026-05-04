@@ -12,30 +12,35 @@ const login = async (userData) => {
   return response.data;
 };
 
-// Logout user
+
 const logout = async () => {
   try {
-    // Call backend logout endpoint if exists
-    // await $api.post('/auth/logout');
-    
-    // Clear local storage
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
-    return true;
+    // Call backend logout endpoint
+    await $api.post('/auth/logout');
   } catch (error) {
-    console.error('Logout error:', error);
-    // Still clear local storage even if API call fails
+    console.error('Logout API error:', error);
+  } finally {
+    // Always clear local storage even if API call fails
     localStorage.removeItem('access_token');
     localStorage.removeItem('user');
-    return false;
   }
 };
 
-// Refresh token
+
+
+// Refresh token - Just call endpoint, cookie is automatic
 const refreshToken = async () => {
   const response = await $api.post('/auth/refresh');
-  return response.data;
+  // Backend returns new access_token and sets new refresh_token cookie if needed
+  if (response.data.access_token) {
+    localStorage.setItem('access_token', response.data.access_token);
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+  }
+  return response;
 };
+
 
 // Get current user
 const getCurrentUser = async () => {

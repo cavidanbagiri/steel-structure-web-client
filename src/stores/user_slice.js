@@ -12,6 +12,27 @@ const initialState = {
   message: '',
 };
 
+// Add this new thunk for checking session on page refresh
+export const checkSession = createAsyncThunk(
+  'auth/checkSession',
+  async (_, thunkAPI) => {
+    try {
+      // If we have a token in storage, try to refresh it
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        const response = await authService.refreshToken();
+        return response.data;
+      }
+      return null;
+    } catch (error) {
+      // Session expired
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user');
+      return thunkAPI.rejectWithValue('Session expired');
+    }
+  }
+);
+
 // Register async thunk
 export const register = createAsyncThunk(
   'auth/register',
@@ -122,7 +143,24 @@ const authSlice = createSlice({
         state.isSuccess = false;
         localStorage.removeItem('user');
         localStorage.removeItem('access_token');
-      });
+      })
+      // Check Session (for page refresh)
+      .addCase(checkSession.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(checkSession.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          state.user = action.payload.user;
+          state.accessToken = action.payload.access_token;
+          state.isSuccess = true;
+        }
+      })
+      .addCase(checkSession.rejected, (state) => {
+        state.isLoading = false;
+        state.user = null;
+        state.accessToken = null;
+      })
   },
 });
 

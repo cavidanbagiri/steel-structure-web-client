@@ -1,0 +1,59 @@
+import $api from "../http/api";
+
+class TransportService {
+    // Fetch transport data with pagination and filters
+    async fetchTransportData(params = {}) {
+        try {
+            const response = await $api.get('/transport/fetch_transport_data', { params });
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    // Fetch single transport by ID
+    async fetchTransportById(id) {
+        try {
+            const response = await $api.get(`/transport/fetch_transport_data/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    // Import transport data from Excel
+    async importTransportData() {
+        try {
+            const response = await $api.post('/transport/import_static_transport_data');
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    // Get unique values for filter dropdowns
+    async getUniqueValues(columnName) {
+        try {
+            const response = await $api.get(`/transport/unique_values/${columnName}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    // Get all unique values for multiple columns (for filter initialization)
+    async getFilterOptions() {
+        try {
+            const columns = ['structure_1', 'structure_2', 'area', 'location', 't_status', 'mark_name'];
+            const promises = columns.map(column => 
+                this.getUniqueValues(column).then(res => ({ [column]: res[column] }))
+            );
+            const results = await Promise.all(promises);
+            return Object.assign({}, ...results);
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+}
+
+export default new TransportService();

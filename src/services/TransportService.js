@@ -45,7 +45,7 @@ class TransportService {
     async getFilterOptions() {
         try {
             const columns = ['structure_1', 'structure_2', 'area', 'location', 't_status', 'mark_name'];
-            const promises = columns.map(column => 
+            const promises = columns.map(column =>
                 this.getUniqueValues(column).then(res => ({ [column]: res[column] }))
             );
             const results = await Promise.all(promises);
@@ -54,6 +54,37 @@ class TransportService {
             throw error.response?.data || error.message;
         }
     }
+
+    async createTransport(data) {
+        try {
+            const response = await $api.post('/transport/create_transport', data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async updateTransport(id, data) {
+        try {
+            const response = await $api.put(`/transport/update_transport/${id}`, data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async deleteTransport(id) {
+        try {
+            const response = await $api.delete(`/transport/delete_transport/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 }
+
+
+
+
 
 export default new TransportService();

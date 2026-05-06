@@ -50,17 +50,60 @@ export const fetchFilterOptions = createAsyncThunk(
     }
 );
 
+export const createTransport = createAsyncThunk(
+    'transport/createTransport',
+    async (data, { rejectWithValue, dispatch }) => {
+        try {
+            const response = await TransportService.createTransport(data);
+            // Refresh the list after successful creation
+            await dispatch(fetchTransportData({ limit: 100, offset: 0 }));
+            return response;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
+export const updateTransport = createAsyncThunk(
+    'transport/updateTransport',
+    async ({ id, data }, { rejectWithValue, dispatch }) => {
+        try {
+            const response = await TransportService.updateTransport(id, data);
+            // Refresh the list after successful update
+            await dispatch(fetchTransportData({ limit: 100, offset: 0 }));
+            return response;
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
+export const deleteTransport = createAsyncThunk(
+    'transport/deleteTransport',
+    async (id, { rejectWithValue, dispatch }) => {
+        try {
+            const response = await TransportService.deleteTransport(id);
+            // Refresh the list after successful deletion
+            await dispatch(fetchTransportData({ limit: 100, offset: 0 }));
+            return { id, ...response };
+        } catch (error) {
+            return rejectWithValue(error);
+        }
+    }
+);
+
+
 // Initial State
 const initialState = {
     // Data
     items: [],
     currentItem: null,
-    
+
     // Pagination
     total: 0,
     limit: 100,
     offset: 0,
-    
+
     // Filters
     filters: {
         structure_1: null,
@@ -76,7 +119,7 @@ const initialState = {
         max_weight: null,
         search: null
     },
-    
+
     // Filter options for dropdowns
     filterOptions: {
         structure_1: [],
@@ -86,13 +129,13 @@ const initialState = {
         t_status: [],
         mark_name: []
     },
-    
+
     // UI States
     loading: false,
     importing: false,
     error: null,
     importResult: null,
-    
+
     // Pagination metadata
     hasMore: false,
     currentPage: 0
@@ -109,27 +152,27 @@ const transportSlice = createSlice({
             state.offset = 0; // Reset pagination when filters change
             state.currentPage = 0;
         },
-        
+
         // Clear all filters
         clearFilters: (state) => {
             state.filters = initialState.filters;
             state.offset = 0;
             state.currentPage = 0;
         },
-        
+
         // Set pagination
         setPagination: (state, action) => {
             state.limit = action.payload.limit || state.limit;
             state.offset = action.payload.offset || state.offset;
             state.currentPage = action.payload.page || state.currentPage;
         },
-        
+
         // Next page
         nextPage: (state) => {
             state.offset += state.limit;
             state.currentPage += 1;
         },
-        
+
         // Previous page
         prevPage: (state) => {
             if (state.offset >= state.limit) {
@@ -137,20 +180,20 @@ const transportSlice = createSlice({
                 state.currentPage -= 1;
             }
         },
-        
+
         // Reset state
         resetTransport: () => initialState,
-        
+
         // Clear current item
         clearCurrentItem: (state) => {
             state.currentItem = null;
         },
-        
+
         // Clear error
         clearError: (state) => {
             state.error = null;
         },
-        
+
         // Set single filter
         setFilter: (state, action) => {
             const { key, value } = action.payload;
@@ -178,7 +221,7 @@ const transportSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            
+
             // Fetch Transport By ID
             .addCase(fetchTransportById.pending, (state) => {
                 state.loading = true;
@@ -192,7 +235,7 @@ const transportSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             })
-            
+
             // Import Transport Data
             .addCase(importTransportData.pending, (state) => {
                 state.importing = true;
@@ -207,7 +250,7 @@ const transportSlice = createSlice({
                 state.importing = false;
                 state.error = action.payload;
             })
-            
+
             // Fetch Filter Options
             .addCase(fetchFilterOptions.pending, (state) => {
                 state.loading = true;
@@ -217,6 +260,44 @@ const transportSlice = createSlice({
                 state.filterOptions = { ...state.filterOptions, ...action.payload };
             })
             .addCase(fetchFilterOptions.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+            // Create Transport
+            .addCase(createTransport.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(createTransport.fulfilled, (state, action) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(createTransport.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Update Transport
+            .addCase(updateTransport.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(updateTransport.fulfilled, (state, action) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(updateTransport.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload;
+            })
+
+            // Delete Transport
+            .addCase(deleteTransport.pending, (state) => {
+                state.loading = true;
+            })
+            .addCase(deleteTransport.fulfilled, (state, action) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(deleteTransport.rejected, (state, action) => {
                 state.loading = false;
                 state.error = action.payload;
             });

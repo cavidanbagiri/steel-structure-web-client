@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+import TransportModal from '../components/transport/TransportModal';
 import {
     fetchTransportData,
     fetchFilterOptions,
@@ -8,7 +9,10 @@ import {
     nextPage,
     prevPage,
     importTransportData,
-    clearError
+    clearError,
+    createTransport,      // Add this
+    updateTransport,      // Add this
+    deleteTransport       // Add this
 } from '../stores/transport_slice';
 
 import {
@@ -47,6 +51,7 @@ const Transport = () => {
         importing,
         importResult
     } = useSelector((state) => state.transport);
+
     const { limit, currentPage, hasMore } = useSelector((state) => state.transport);
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -55,6 +60,7 @@ const Transport = () => {
     const [editedData, setEditedData] = useState({});
     const [localFilters, setLocalFilters] = useState({});  // ← ADD THIS LINE
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Column definitions
     const allColumns = [
@@ -161,10 +167,50 @@ const Transport = () => {
     };
 
     const handleSave = async () => {
-        // Here you'll call your update API
-        console.log('Saving:', editedData);
-        setEditingRow(null);
-        setEditedData({});
+        try {
+            // Dispatch the update action
+            const result = await dispatch(updateTransport({ 
+                id: editingRow, 
+                data: editedData 
+            })).unwrap();
+            
+            // Show success message (optional)
+            console.log('Update successful:', result);
+            
+            // Exit edit mode
+            setEditingRow(null);
+            setEditedData({});
+            
+            // Optional: Show a toast notification
+            // toast.success('Transport updated successfully');
+            
+        } catch (error) {
+            console.error('Update failed:', error);
+            // Optional: Show error toast
+            // toast.error('Failed to update transport');
+        }
+    };
+
+    const handleCreate = async (formData) => {
+        try {
+            const result = await dispatch(createTransport(formData)).unwrap();
+            console.log('Create successful:', result);
+            // Optional: Show success toast
+        } catch (error) {
+            console.error('Create failed:', error);
+            // Optional: Show error toast
+            throw error; // Re-throw to let modal know it failed
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm(`Are you sure you want to delete ${id} record?`)) {
+            try {
+                const result = await dispatch(deleteTransport(id)).unwrap();
+            } catch (error) {
+                console.error('Delete failed:', error);
+            }
+        }
     };
 
     const handleCancel = () => {
@@ -383,7 +429,7 @@ const Transport = () => {
                                 )}
                             </div>
                             <button
-                                onClick={() => {/* Open add modal */ }}
+                                onClick={() => setIsModalOpen(true)}
                                 className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                             >
                                 <Plus size={18} />
@@ -514,7 +560,7 @@ const Transport = () => {
                                                             <Edit2 size={16} />
                                                         </button>
                                                         <button
-                                                            onClick={() => {/* Delete */ }}
+                                                            onClick={() => handleDelete(row.id)}
                                                             className="p-1 text-red-600 hover:text-red-800"
                                                         >
                                                             <Trash2 size={16} />
@@ -535,6 +581,12 @@ const Transport = () => {
                     </div>
                 </div>
             </div>
+            {/* Modal */}
+            <TransportModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSave={handleCreate}
+            />
         </div>
     );
 };

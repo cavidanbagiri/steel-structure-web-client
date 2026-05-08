@@ -1,0 +1,41 @@
+
+Now we need to create main page:
+1) The filters must be shown under the column
+2) The pagination must be
+3) The columns hide and show must be shown to User.
+4) The pagination must be show top and bottom of the table.
+
+Folder Structure
+/stores/main_slice.js
+/stores/index.js
+/services/MainService.js
+/pages/Main.jsx
+
+// index.js
+// stores/store.js
+import { configureStore } from '@reduxjs/toolkit';
+import authSlice from './user_slice.js';
+import transportSlice from './transport_slice.js'
+import mainSlice from './main_slice.js'
+
+const store = configureStore({
+  reducer: {
+    auth: authSlice,
+    transport: transportSlice,
+    main: mainSlice
+  },
+});
+
+export default store;
+
+
+/pages/Main.jsx
+import React from 'react'
+
+function Main() {
+  return (
+    <div>Main</div>
+  )
+}
+
+export default Main

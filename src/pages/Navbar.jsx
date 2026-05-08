@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { logout, reset } from '../stores/user_slice';
 
 import { IoHomeOutline } from "react-icons/io5";
+import { CiViewTable } from "react-icons/ci";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { BsTruck } from "react-icons/bs";
 
@@ -69,6 +70,18 @@ const Navbar = () => {
                   </NavLink>
                 </li>
 
+<li className='flex w-full items-center '>
+                  <NavLink
+                    to="/main"
+                    className={({ isActive }) =>
+                      `flex flex-row items-center justify-center py-4 text-white w-full  no-underline hover:bg-gray-800 transition-colors ${isActive ? ' font-medium' : ''}`
+                    }
+                  >
+                    <CiViewTable className='text-2xl' />
+                  </NavLink>
+                </li>
+
+
                 <li className='flex w-full items-center '>
                   <NavLink
                     to="/transport"
@@ -76,7 +89,7 @@ const Navbar = () => {
                       `flex flex-row items-center justify-center py-4 text-white w-full  no-underline hover:bg-gray-800 transition-colors ${isActive ? ' font-medium' : ''}`
                     }
                   >
-                    <BsTruck className='text-2xl' />
+                    <BsTruck className='text-xl' />
                   </NavLink>
                 </li>
               </div>

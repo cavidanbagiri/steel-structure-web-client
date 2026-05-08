@@ -393,10 +393,10 @@ const Transport = () => {
         <div className="min-h-screen bg-gray-50">
             {/* Header */}
             <div className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
-                <div className="px-6 py-4">
+                <div className="px-6 py-2">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900">SS Management</h1>
+                            <h1 className="text-2xl font-bold text-gray-900">ST Management</h1>
                             <p className="text-sm text-gray-500 mt-1">Transport page</p>
                         </div>
                         <div className="flex gap-2">
@@ -481,7 +481,7 @@ const Transport = () => {
                     {/* Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-gray-50 border-b border-gray-200 ">
                                 <tr>
                                     {columns.filter(col => col.visible).map(column => (
                                         <th
@@ -532,7 +532,7 @@ const Transport = () => {
                                         <tr key={row.id} className="hover:bg-gray-50 transition-colors">
                                             {columns.filter(col => col.visible).map(column => (
                                                 <td key={`${row.id}-${column.id}`} className="px-3 py-2 text-xs text-gray-900">
-                                                    {renderCell(column, row)}
+                                                    {renderCell(column, row) } {} 
                                                 </td>
                                             ))}
                                             <td className="px-3 py-2 sticky right-0 bg-white shadow-left">

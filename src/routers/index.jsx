@@ -6,6 +6,7 @@ import PublicRoute from '../components/auth/PublicRoute';
 
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
+import Main from '../pages/Main';
 import Transport from '../pages/Transport';
 
 
@@ -27,6 +28,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'main',
+        element: (
+          <ProtectedRoute>
+            <Main />
           </ProtectedRoute>
         ),
       },

@@ -1,252 +1,257 @@
-// pages/Main.jsx
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { 
-    fetchMainData, 
-    fetchUniqueValues,
-    fetchStatistics,
-    setFilters, 
-    resetFilters, 
-    setPagination,
-    toggleColumn,
-    resetColumnVisibility,
-    selectMainData,
-    selectMainLoading,
-    selectMainError,
-    selectMainPagination,
-    selectMainFilters,
-    selectMainStatistics,
-    selectColumnVisibility
+// src/pages/Main.jsx
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import {
+  fetchMainData,
+  setFilters,
+  setPagination,
+  toggleColumn,
+  resetColumnVisibility,
+  selectMainData,
+  selectMainLoading,
+  selectMainPagination,
+  selectMainFilters,
+  selectColumnVisibility
 } from '../stores/main_slice';
+import MainStats from '../components/main/MainStats';
+import MainPagination from '../components/main/MainPagination';
+import MainTable from '../components/main/MainTable';
 
-import Table from '../components/main/Table';
-import Pagination from '../components/main/Pagination';
-import ColumnVisibilityControl from '../components/main/ColumnVisibilityControl';
-import StatisticsCards from '../components/main/StatisticsCards';
+const Icons = {
+  Import: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  ),
+  Plus: () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
+  Loader: () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+  ),
+};
+
+// Column definitions with filterType
+const ALL_COLUMNS = [
+  { key: 'id', label: 'ID', sortable: true, filterable: false },
+  { key: 'area', label: 'Area', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'zone', label: 'Zone', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'key', label: 'Key', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'row_labels', label: 'Row Labels', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'item', label: 'Item', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'p_s', label: 'P/S', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'description', label: 'Description', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'section', label: 'Section', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'length', label: 'Length', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'weight', label: 'Weight', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'weight_total', label: 'Total Weight', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'dwgn', label: 'Drawing', sortable: true, filterable: true, filterType: 'text' },
+];
 
 function Main() {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
+  
+  const data = useSelector(selectMainData);
+  const loading = useSelector(selectMainLoading);
+  const pagination = useSelector(selectMainPagination);
+  const filters = useSelector(selectMainFilters);
+  const columnVisibility = useSelector(selectColumnVisibility);
+  
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [filterValues, setFilterValues] = useState({});
+
+  // Build stable filters key to prevent infinite re-fetching
+  const filtersKey = useMemo(() => {
+    const activeFilters = {};
+    Object.keys(filters).forEach(key => {
+      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+        activeFilters[key] = filters[key];
+      }
+    });
+    return JSON.stringify({ limit: pagination.limit, offset: pagination.offset, filters: activeFilters });
+  }, [filters, pagination.limit, pagination.offset]);
+
+  // Fetch data when pagination or filters change
+  useEffect(() => {
+    const { filters: activeFilters, limit, offset } = JSON.parse(filtersKey);
     
-    // Selectors
-    const data = useSelector(selectMainData);
-    const loading = useSelector(selectMainLoading);
-    const error = useSelector(selectMainError);
-    const pagination = useSelector(selectMainPagination);
-    const filters = useSelector(selectMainFilters);
-    const statistics = useSelector(selectMainStatistics);
-    const columnVisibility = useSelector(selectColumnVisibility);
-    const uniqueValues = useSelector(state => state.main.uniqueValues);
+    // Build params matching backend expectations
+    const params = { limit, offset };
     
-    // Local state for table filters
-    const [tableFilters, setTableFilters] = useState({});
-    const isInitialMount = useRef(true);
-    const debounceTimer = useRef(null);
-    
-    // Define columns with filter configurations
-    const columns = [
-        { key: 'id', label: 'ID', sortable: true, type: 'number', filterType: 'number' },
-        { key: 'area', label: 'Area', sortable: true, type: 'text', filterType: 'select', options: uniqueValues.area || [] },
-        { key: 'zone', label: 'Zone', sortable: true, type: 'text', filterType: 'select', options: uniqueValues.zone || [] },
-        { key: 'key', label: 'Key', sortable: true, type: 'text', filterType: 'text' },
-        { key: 'row_labels', label: 'Row Labels', sortable: true, type: 'text', filterType: 'text' },
-        { key: 'item', label: 'Item', sortable: true, type: 'text', filterType: 'text' },
-        { key: 'p_s', label: 'P/S', sortable: true, type: 'text', filterType: 'select', options: ['Primary', 'Secondary'] },
-        { key: 'qty', label: 'Quantity', sortable: true, type: 'number', filterType: 'range' },
-        { key: 'description', label: 'Description', sortable: true, type: 'text', filterType: 'text' },
-        { key: 'section', label: 'Section', sortable: true, type: 'text', filterType: 'text' },
-        { key: 'length', label: 'Length (mm)', sortable: true, type: 'number', filterType: 'range' },
-        { key: 'weight', label: 'Weight (kg)', sortable: true, type: 'number', filterType: 'range' },
-        { key: 'weight_total', label: 'Total Weight (kg)', sortable: true, type: 'number', filterType: 'range' },
-        { key: 'dwgn', label: 'Drawing No.', sortable: true, type: 'text', filterType: 'text' }
-    ];
-    
-    // Load data function - wrap with useCallback to prevent recreation
-    const loadData = useCallback(() => {
-      console.log('here worked')
-        const params = {
-            ...filters,
-            limit: pagination.limit,
-            offset: pagination.offset
-        };
-        dispatch(fetchMainData(params));
-    }, [dispatch, filters, pagination.limit, pagination.offset]);
-    useEffect(() => {
-    loadData();
-}, []); // Empty array - only once
-    
-    // Load statistics only once on mount
-    useEffect(() => {
-        dispatch(fetchStatistics());
-    }, [dispatch]);
-    
-    // Load unique values only once on mount
-    useEffect(() => {
-        const loadUniqueValues = async () => {
-            const selectColumns = ['area', 'zone'];
-            for (const column of selectColumns) {
-                if (!uniqueValues[column] || uniqueValues[column].length === 0) {
-                    dispatch(fetchUniqueValues(column));
-                }
-            }
-        };
-        loadUniqueValues();
-    }, [dispatch]); // Empty dependency array - only run once
-    
-    // Load data when filters or pagination change (but not on initial mount)
-    useEffect(() => {
-        if (isInitialMount.current) {
-            isInitialMount.current = false;
-            loadData();
-        } else {
-            loadData();
+    Object.keys(activeFilters).forEach(key => {
+      const value = activeFilters[key];
+      const column = ALL_COLUMNS.find(col => col.key === key);
+      
+      if (column?.filterType === 'range') {
+        // For range filters, send min_* and max_*
+        if (value?.min !== undefined && value.min !== '') {
+          params[`min_${key}`] = value.min;
         }
-    }, [loadData]); // Only depend on loadData function
-    
-    // Handle filter changes with debounce
-    const handleFilterChange = (newFilters) => {
-        setTableFilters(newFilters);
-        
-        // Clear previous timer
-        if (debounceTimer.current) {
-            clearTimeout(debounceTimer.current);
+        if (value?.max !== undefined && value.max !== '') {
+          params[`max_${key}`] = value.max;
         }
-        
-        // Set new timer
-        debounceTimer.current = setTimeout(() => {
-            // Convert table filters to backend format
-            const backendFilters = {};
-            
-            Object.keys(newFilters).forEach(key => {
-                const value = newFilters[key];
-                if (value !== null && value !== '' && value !== undefined) {
-                    // Handle range filters (min_qty, max_qty, etc.)
-                    if (key.startsWith('min_') || key.startsWith('max_')) {
-                        backendFilters[key] = value;
-                    } else {
-                        backendFilters[key] = value;
-                    }
-                }
-            });
-            
-            dispatch(setFilters(backendFilters));
-        }, 500);
+      } else if (key === 'search') {
+        params.search = value;
+      } else {
+        // For text filters, send as is
+        params[key] = value;
+      }
+    });
+    
+    dispatch(fetchMainData(params));
+  }, [dispatch, filtersKey]);
+
+  // Sync Redux filters to local filterValues for display
+  useEffect(() => {
+    setFilterValues(prev => {
+      const updated = { ...prev };
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== null && filters[key] !== undefined) {
+          updated[key] = filters[key];
+        }
+      });
+      return updated;
+    });
+  }, [filters]);
+
+  // Sorting
+  const handleSort = useCallback((columnKey) => {
+    setSortConfig(prev => {
+      if (prev.key === columnKey) {
+        if (prev.direction === 'asc') return { key: columnKey, direction: 'desc' };
+        return { key: columnKey, direction: 'asc' };
+      }
+      return { key: columnKey, direction: 'asc' };
+    });
+  }, []);
+
+
+  useEffect(() => {
+    const activeFilters = {};
+    Object.keys(filters).forEach(key => {
+        if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+        activeFilters[key] = filters[key];
+        }
+    });
+    
+    const params = {
+        limit: pagination.limit,
+        offset: pagination.offset,
+        ...activeFilters,
     };
     
-    const handlePageChange = (newOffset) => {
-        dispatch(setPagination({ offset: newOffset }));
-    };
+    console.log('SENDING PARAMS:', params); // <-- ADD THIS
     
-    const handleLimitChange = (newLimit) => {
-        dispatch(setPagination({ limit: newLimit, offset: 0 }));
-    };
-    
-    const handleSort = (column, direction) => {
-        dispatch(setFilters({ 
-            order_by: column.key, 
-            order_direction: direction 
-        }));
-    };
-    
-    const handleResetFilters = () => {
-        setTableFilters({});
-        dispatch(resetFilters());
-    };
-    
-    // Cleanup debounce timer
-    useEffect(() => {
-        return () => {
-            if (debounceTimer.current) {
-                clearTimeout(debounceTimer.current);
-            }
-        };
-    }, []);
-    
-    if (loading && data.length === 0) {
-        return (
-            <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    dispatch(fetchMainData(params));
+    }, [dispatch, pagination.limit, pagination.offset, filters]);
+
+const handleFilterChange = useCallback((columnKey, value) => {
+  setFilterValues(prev => ({ ...prev, [columnKey]: value }));
+  dispatch(setFilters({ [columnKey]: value || null }));
+}, [dispatch]);
+
+  const handleFilterClear = useCallback((columnKey) => {
+    setFilterValues(prev => {
+      const updated = { ...prev };
+      delete updated[columnKey];
+      return updated;
+    });
+    dispatch(setFilters({ [columnKey]: null }));
+  }, [dispatch]);
+
+  // Pagination
+  const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
+  const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
+
+  const handlePageChange = useCallback((newOffset) => {
+    dispatch(setPagination({ offset: newOffset }));
+  }, [dispatch]);
+
+  // Column toggle
+  const handleToggleColumn = useCallback((columnKey) => {
+    dispatch(toggleColumn(columnKey));
+  }, [dispatch]);
+
+  const handleResetColumns = useCallback(() => {
+    dispatch(resetColumnVisibility());
+  }, [dispatch]);
+
+  // Row actions
+  const handleRowAction = useCallback((action, rowId) => {
+    console.log(`Action: ${action}, Row ID: ${rowId}`);
+    // Handle different actions here
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-6 space-y-5">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Main Data</h1>
+          {loading && (
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full">
+              <span className="text-indigo-500"><Icons.Loader /></span>
+              <span className="text-xs text-indigo-600 font-medium">Loading...</span>
             </div>
-        );
-    }
-    
-    if (error) {
-        return (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                Error: {JSON.stringify(error)}
-            </div>
-        );
-    }
-    
-    return (
-        <div className="container mx-auto px-4 py-6">
-            {/* Page Title */}
-            <div className="mb-6 flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Main Data Management</h1>
-                    <p className="text-gray-600">View and manage main data records</p>
-                </div>
-                <div className="flex space-x-2">
-                    {/* Reset Filters Button */}
-                    {(Object.keys(filters).some(key => filters[key] !== null && filters[key] !== '')) && (
-                        <button
-                            onClick={handleResetFilters}
-                            className="px-3 py-2 text-sm text-red-600 hover:text-red-800 border rounded-md hover:bg-red-50"
-                        >
-                            Clear All Filters
-                        </button>
-                    )}
-                    {/* Column Visibility Control */}
-                    <ColumnVisibilityControl 
-                        columns={columns}
-                        visibility={columnVisibility}
-                        onToggle={(columnKey) => dispatch(toggleColumn(columnKey))}
-                        onReset={() => dispatch(resetColumnVisibility())}
-                    />
-                </div>
-            </div>
-            
-            {/* Statistics Cards */}
-            {statistics && (
-                <StatisticsCards statistics={statistics} />
-            )}
-            
-            {/* Top Pagination */}
-            <div className="mb-4 flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                    Showing {data.length} of {pagination.total} records
-                </div>
-                <Pagination 
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                    onLimitChange={handleLimitChange}
-                />
-            </div>
-            
-            {/* Main Table with Filters in Header */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-                <Table 
-                    columns={columns}
-                    data={data}
-                    loading={loading}
-                    columnVisibility={columnVisibility}
-                    onSort={handleSort}
-                    onFilter={handleFilterChange}
-                    filters={tableFilters}
-                    sortBy={filters.order_by}
-                    sortDirection={filters.order_direction}
-                />
-            </div>
-            
-            {/* Bottom Pagination */}
-            <div className="mt-4 flex justify-end">
-                <Pagination 
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                    onLimitChange={handleLimitChange}
-                />
-            </div>
+          )}
         </div>
-    );
+        <div className="flex items-center gap-3">
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 text-sm font-medium shadow-sm">
+            <Icons.Import /> Import Data
+          </button>
+          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 shadow-lg shadow-indigo-200 hover:shadow-indigo-300/50 transition-all duration-200 text-sm font-medium">
+            <Icons.Plus /> Add New
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      {/* <MainStats
+        pagination={pagination}
+        visibleColumnsCount={ALL_COLUMNS.filter(col => columnVisibility[col.key] !== false).length}
+        currentPage={currentPage}
+        totalPages={totalPages}
+      /> */}
+
+      {/* Top Pagination */}
+      <MainPagination
+        total={pagination.total}
+        limit={pagination.limit}
+        offset={pagination.offset}
+        onPageChange={handlePageChange}
+      />
+
+      {/* Table */}
+      <MainTable
+        columns={ALL_COLUMNS}
+        columnVisibility={columnVisibility}
+        data={data}
+        loading={loading}
+        sortConfig={sortConfig}
+        filterValues={filterValues}
+        onToggleColumn={handleToggleColumn}
+        onResetColumns={handleResetColumns}
+        onSort={handleSort}
+        onFilterChange={handleFilterChange}
+        onFilterClear={handleFilterClear}
+        onRowAction={handleRowAction}
+      />
+
+      {/* Bottom Pagination */}
+      <MainPagination
+        total={pagination.total}
+        limit={pagination.limit}
+        offset={pagination.offset}
+        onPageChange={handlePageChange}
+      />
+    </div>
+  );
 }
 
 export default Main;

@@ -1,35 +1,18 @@
 
-Now we need to create main page:
-1) The filters must be shown under the column
-2) The pagination must be
-3) The columns hide and show must be shown to User.
-4) The pagination must be show top and bottom of the table.
 
-Folder Structure
-/stores/main_slice.js
-/stores/index.js
-/services/MainService.js
-/pages/Main.jsx
-
-// index.js
-// stores/store.js
-import { configureStore } from '@reduxjs/toolkit';
-import authSlice from './user_slice.js';
-import transportSlice from './transport_slice.js'
-import mainSlice from './main_slice.js'
-
-const store = configureStore({
-  reducer: {
-    auth: authSlice,
-    transport: transportSlice,
-    main: mainSlice
-  },
-});
-
-export default store;
+Now, l want to create a main.jsx with extremely beautiful design.
+The page will be below form:
+1) Pagination will be top and bottom of the table.
+2) Filters search box will be bottom of the column names not as seperate component
+3) Column must be have asc and desc order ability
+4) The first column will have an icon when l click, will open with some options.
+5) Column names must be hide and show ability.
+6) In thepage must be 2 buttons. 'Import data' and 'Add New'
 
 
-/pages/Main.jsx
+If you want, you can create a very simple form of the page, if everthing will beautifull, we will go on. Or if you believe you can create a beautifull page, you can create from first time.
+Then we will go Transport page.
+
 import React from 'react'
 
 function Main() {

@@ -30,6 +30,24 @@ class MainService {
             throw error.response?.data || error.message;
         }
     }
+
+    async fetchRowById(id) {
+        try {
+            const response = await $api.get(`/main/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+    async insertToTransport(data) {
+        try {
+            const response = await $api.post("/main/insert_to_transport", data);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
 }
 
 export default new MainService();

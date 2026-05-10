@@ -16,6 +16,7 @@ import {
 import MainStats from '../components/main/MainStats';
 import MainPagination from '../components/main/MainPagination';
 import MainTable from '../components/main/MainTable';
+import MainDetailModal from '../components/main/MainDetailModal';
 
 const Icons = {
   Import: () => (
@@ -46,6 +47,7 @@ const ALL_COLUMNS = [
   { key: 'item', label: 'Item', sortable: true, filterable: true, filterType: 'text' },
   { key: 'p_s', label: 'P/S', sortable: true, filterable: true, filterType: 'text' },
   { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'left_over_qty', label: 'Left Over', sortable: true, filterable: true, filterType: 'range' },  // NEW
   { key: 'description', label: 'Description', sortable: true, filterable: true, filterType: 'text' },
   { key: 'section', label: 'Section', sortable: true, filterable: true, filterType: 'text' },
   { key: 'length', label: 'Length', sortable: true, filterable: true, filterType: 'range' },
@@ -56,15 +58,21 @@ const ALL_COLUMNS = [
 
 function Main() {
   const dispatch = useDispatch();
-  
+
   const data = useSelector(selectMainData);
   const loading = useSelector(selectMainLoading);
   const pagination = useSelector(selectMainPagination);
   const filters = useSelector(selectMainFilters);
   const columnVisibility = useSelector(selectColumnVisibility);
-  
+
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [filterValues, setFilterValues] = useState({});
+
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    mode: null,
+    rowId: null,
+  });
 
   // Build stable filters key to prevent infinite re-fetching
   const filtersKey = useMemo(() => {
@@ -80,14 +88,14 @@ function Main() {
   // Fetch data when pagination or filters change
   useEffect(() => {
     const { filters: activeFilters, limit, offset } = JSON.parse(filtersKey);
-    
+
     // Build params matching backend expectations
     const params = { limit, offset };
-    
+
     Object.keys(activeFilters).forEach(key => {
       const value = activeFilters[key];
       const column = ALL_COLUMNS.find(col => col.key === key);
-      
+
       if (column?.filterType === 'range') {
         // For range filters, send min_* and max_*
         if (value?.min !== undefined && value.min !== '') {
@@ -103,7 +111,7 @@ function Main() {
         params[key] = value;
       }
     });
-    
+
     dispatch(fetchMainData(params));
   }, [dispatch, filtersKey]);
 
@@ -135,26 +143,25 @@ function Main() {
   useEffect(() => {
     const activeFilters = {};
     Object.keys(filters).forEach(key => {
-        if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
         activeFilters[key] = filters[key];
-        }
+      }
     });
-    
-    const params = {
-        limit: pagination.limit,
-        offset: pagination.offset,
-        ...activeFilters,
-    };
-    
-    console.log('SENDING PARAMS:', params); // <-- ADD THIS
-    
-    dispatch(fetchMainData(params));
-    }, [dispatch, pagination.limit, pagination.offset, filters]);
 
-const handleFilterChange = useCallback((columnKey, value) => {
-  setFilterValues(prev => ({ ...prev, [columnKey]: value }));
-  dispatch(setFilters({ [columnKey]: value || null }));
-}, [dispatch]);
+    const params = {
+      limit: pagination.limit,
+      offset: pagination.offset,
+      ...activeFilters,
+    };
+
+
+    dispatch(fetchMainData(params));
+  }, [dispatch, pagination.limit, pagination.offset, filters]);
+
+  const handleFilterChange = useCallback((columnKey, value) => {
+    setFilterValues(prev => ({ ...prev, [columnKey]: value }));
+    dispatch(setFilters({ [columnKey]: value || null }));
+  }, [dispatch]);
 
   const handleFilterClear = useCallback((columnKey) => {
     setFilterValues(prev => {
@@ -182,11 +189,39 @@ const handleFilterChange = useCallback((columnKey, value) => {
     dispatch(resetColumnVisibility());
   }, [dispatch]);
 
-  // Row actions
+
+
+  // For modal Operations
   const handleRowAction = useCallback((action, rowId) => {
-    console.log(`Action: ${action}, Row ID: ${rowId}`);
-    // Handle different actions here
+    if (action === 'delete') {
+      // Handle delete separately (confirmation dialog later)
+      console.log('Delete item:', rowId);
+      return;
+    }
+
+    setModalState({
+      isOpen: true,
+      mode: action,  // 'view' | 'edit' | 'duplicate' | 'transport' | 'erected'
+      rowId: rowId,
+    });
   }, []);
+
+  // Add handleModalClose
+  const handleModalClose = useCallback(() => {
+    setModalState({ isOpen: false, mode: null, rowId: null });
+  }, []);
+
+  const handleModalSuccess = useCallback(() => {
+    // Refetch main data after successful transport/operation
+    dispatch(fetchMainData({
+      limit: pagination.limit,
+      offset: pagination.offset,
+      ...filters,
+    }));
+  }, [dispatch, pagination, filters]);
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 space-y-5">
@@ -210,14 +245,6 @@ const handleFilterChange = useCallback((columnKey, value) => {
           </button>
         </div>
       </div>
-
-      {/* Stats */}
-      {/* <MainStats
-        pagination={pagination}
-        visibleColumnsCount={ALL_COLUMNS.filter(col => columnVisibility[col.key] !== false).length}
-        currentPage={currentPage}
-        totalPages={totalPages}
-      /> */}
 
       {/* Top Pagination */}
       <MainPagination
@@ -249,6 +276,14 @@ const handleFilterChange = useCallback((columnKey, value) => {
         limit={pagination.limit}
         offset={pagination.offset}
         onPageChange={handlePageChange}
+      />
+      {/* Modal */}
+      <MainDetailModal
+        mode={modalState.mode}
+        rowId={modalState.rowId}
+        isOpen={modalState.isOpen}
+        onClose={handleModalClose}
+        onSuccess={handleModalSuccess}   // ADD THIS
       />
     </div>
   );

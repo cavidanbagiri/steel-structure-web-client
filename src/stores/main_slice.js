@@ -56,6 +56,7 @@ const loadColumnVisibility = () => {
         item: true,
         p_s: true,
         qty: true,
+        left_over_qty: true,
         description: true,
         section: true,
         length: true,
@@ -163,9 +164,6 @@ const mainSlice = createSlice({
                         offset: action.payload.pagination.offset || 0
                     };
                 }
-                // if (action.payload.filters_applied) {
-                //     state.filters = { ...state.filters, ...action.payload.filters_applied };
-                // }
             })
             .addCase(fetchMainData.rejected, (state, action) => {
                 state.loading = false;

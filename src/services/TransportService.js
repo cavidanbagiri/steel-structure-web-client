@@ -11,10 +11,10 @@ class TransportService {
         }
     }
 
-    // Fetch single transport by ID
+    // NEW: Fetch single transport by ID
     async fetchTransportById(id) {
         try {
-            const response = await $api.get(`/transport/fetch_transport_data/${id}`);
+            const response = await $api.get(`/transport/${id}`);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;
@@ -76,6 +76,16 @@ class TransportService {
     async deleteTransport(id) {
         try {
             const response = await $api.delete(`/transport/delete_transport/${id}`);
+            return response.data;
+        } catch (error) {
+            throw error.response?.data || error.message;
+        }
+    }
+
+     // NEW: Insert erected record
+    async insertToErected(data) {
+        try {
+            const response = await $api.post("/transport/insert_to_erected", data);
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

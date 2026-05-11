@@ -18,6 +18,7 @@ import {
 import TransportStats from '../components/transport/TransportStats';
 import TransportPagination from '../components/transport/TransportPagination';
 import TransportTable from '../components/transport/TransportTable';
+import TransportDetailModal from '../components/transport/TransportDetailModal'
 
 const ALL_COLUMNS = [
   { key: 'id', label: 'ID' },
@@ -26,6 +27,7 @@ const ALL_COLUMNS = [
   { key: 'raw_labels', label: 'Raw Labels' },
   { key: 'mark_name', label: 'Mark Name' },
   { key: 't_qty', label: 'Qty' },
+  { key: 't_leftover_qty', label: 'Leftover QTY' },
   { key: 't_weight', label: 'Weight' },
   { key: 't_date', label: 'Date' },
   { key: 't_status', label: 'Status' },
@@ -38,7 +40,7 @@ const ALL_COLUMNS = [
 
 function Transport() {
   const dispatch = useDispatch();
-  
+
   const items = useSelector(selectTransportItems);
   const loading = useSelector(selectTransportLoading);
   const total = useSelector(selectTransportTotal);
@@ -46,7 +48,7 @@ function Transport() {
   const pagination = useSelector(selectPagination);
   const filterOptions = useSelector(selectFilterOptions);
   const importStatus = useSelector(selectImportStatus);
-  
+
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [localFilters, setLocalFilters] = useState({});
   const [columnVisibility, setColumnVisibility] = useState(() => {
@@ -54,7 +56,13 @@ function Transport() {
     if (saved) return JSON.parse(saved);
     return Object.fromEntries(ALL_COLUMNS.map(c => [c.key, true]));
   });
-  
+
+  const [modalState, setModalState] = useState({
+    isOpen: false,
+    mode: null,
+    rowId: null,
+  });
+
   const prevParamsRef = useRef('');
 
   // Fetch filter options on mount
@@ -65,15 +73,15 @@ function Transport() {
   // Build params and fetch
   useEffect(() => {
     const params = { limit: pagination.limit, offset: pagination.offset };
-    
+
     Object.keys(filters).forEach(key => {
       if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
         params[key] = filters[key];
       }
     });
-    
+
     const paramsStr = JSON.stringify(params);
-    
+
     if (paramsStr !== prevParamsRef.current) {
       prevParamsRef.current = paramsStr;
       dispatch(fetchTransportData(params));
@@ -126,9 +134,39 @@ function Transport() {
     setColumnVisibility(Object.fromEntries(ALL_COLUMNS.map(c => [c.key, true])));
   }, []);
 
+
+  // For modal Operations
   const handleRowAction = useCallback((action, rowId) => {
-    console.log(`Action: ${action}, Row ID: ${rowId}`);
+    if (action === 'delete') {
+      // Handle delete separately (confirmation dialog later)
+      console.log('Delete item:', rowId);
+      return;
+    }
+
+    setModalState({
+      isOpen: true,
+      mode: action,  // 'view' | 'edit' | 'duplicate' | 'transport' | 'erected'
+      rowId: rowId,
+    });
   }, []);
+
+  // Add handleModalClose
+  const handleModalClose = useCallback(() => {
+    setModalState({ isOpen: false, mode: null, rowId: null });
+  }, []);
+
+
+
+  const handleModalSuccess = useCallback(() => {
+    // Refetch transport data after successful operation
+    dispatch(fetchTransportData({
+      limit: pagination.limit,
+      offset: pagination.offset,
+      ...filters,
+    }));
+  }, [dispatch, pagination, filters]);
+
+
 
   const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
   const totalPages = Math.ceil(total / pagination.limit) || 1;
@@ -202,6 +240,17 @@ function Transport() {
         offset={pagination.offset}
         onPageChange={handlePageChange}
       />
+
+
+      {/* Modal */}
+      <TransportDetailModal
+        mode={modalState.mode}
+        rowId={modalState.rowId}
+        isOpen={modalState.isOpen}
+        onClose={handleModalClose}
+        onSuccess={handleModalSuccess}   // ADD THIS
+      />
+
     </div>
   );
 }

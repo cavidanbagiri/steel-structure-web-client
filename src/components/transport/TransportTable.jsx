@@ -123,7 +123,7 @@ function TransportTable({
                   {visibleColumns.map(column => (
                     <td
                       key={column.key}
-                      className={`px-4 py-3 text-sm whitespace-nowrap ${
+                      className={`px-4 py-3 text-xs whitespace-nowrap ${
                         column.key === 'id' ? 'text-gray-400 font-mono text-xs' :
                         column.key === 'key' || column.key === 'structure_2' ? 'max-w-xs truncate text-gray-700' :
                         'text-gray-800'

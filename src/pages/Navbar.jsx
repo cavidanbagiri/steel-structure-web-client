@@ -6,6 +6,11 @@ import { IoHomeOutline } from "react-icons/io5";
 import { CiViewTable } from "react-icons/ci";
 import { CiDeliveryTruck } from "react-icons/ci";
 import { BsTruck } from "react-icons/bs";
+import { PiCraneTowerLight } from "react-icons/pi";
+import { RxDashboard } from "react-icons/rx";
+
+
+
 
 
 import { IoIosLogOut } from "react-icons/io";
@@ -66,11 +71,22 @@ const Navbar = () => {
                       `flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800  transition-colors ${isActive ? ' font-medium' : ''}`
                     }
                   >
+                    <RxDashboard className='text-2xl' />
+                  </NavLink>
+                </li>
+
+                <li className='flex w-full'>
+                  <NavLink
+                    to="/home"
+                    className={({ isActive }) =>
+                      `flex items-center justify-center py-4 text-white w-full no-underline hover:bg-gray-800  transition-colors ${isActive ? ' font-medium' : ''}`
+                    }
+                  >
                     <IoHomeOutline className='text-2xl' />
                   </NavLink>
                 </li>
 
-<li className='flex w-full items-center '>
+                <li className='flex w-full items-center '>
                   <NavLink
                     to="/main"
                     className={({ isActive }) =>
@@ -90,6 +106,16 @@ const Navbar = () => {
                     }
                   >
                     <BsTruck className='text-xl' />
+                  </NavLink>
+                </li>
+                <li className='flex w-full items-center '>
+                  <NavLink
+                    to="/erected"
+                    className={({ isActive }) =>
+                      `flex flex-row items-center justify-center py-4 text-white w-full  no-underline hover:bg-gray-800 transition-colors ${isActive ? ' font-medium' : ''}`
+                    }
+                  >
+                    <PiCraneTowerLight className='text-2xl' />
                   </NavLink>
                 </li>
               </div>

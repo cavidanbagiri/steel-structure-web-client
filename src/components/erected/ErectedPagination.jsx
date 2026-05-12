@@ -1,27 +1,13 @@
-// src/components/main/MainPagination.jsx
 import React, { useState } from 'react';
 
-const Icons = {
-  ChevronLeft: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  ),
-  ChevronRight: () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <polyline points="9 18 15 12 9 6" />
-    </svg>
-  ),
-};
-
-function MainPagination({ total, limit, offset, onPageChange }) {
+function ErectedPagination({ total, limit, offset, onPageChange }) {
   const totalPages = Math.ceil(total / limit) || 1;
   const currentPage = Math.floor(offset / limit) + 1;
   const [gotoInput, setGotoInput] = useState(currentPage);
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) {
-      onPageChange((page - 1) * limit);
+      onPageChange(page);
       setGotoInput(page);
     }
   };
@@ -41,7 +27,7 @@ function MainPagination({ total, limit, offset, onPageChange }) {
   };
 
   return (
-    <div className="flex items-center justify-start px-5 py-3 bg-white border-b-0 border-gray-200 rounded-xl shadow-sm flex-wrap gap-3">
+    <div className="flex items-center justify-start px-5 py-3 bg-white border border-gray-200 rounded-xl shadow-sm flex-wrap gap-3">
       
       <div className="flex items-center gap-2">
         <button
@@ -49,7 +35,7 @@ function MainPagination({ total, limit, offset, onPageChange }) {
           disabled={currentPage <= 1}
           className="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
         >
-          <Icons.ChevronLeft />
+          ‹
         </button>
         
         {getPageNumbers().map(page => (
@@ -71,7 +57,7 @@ function MainPagination({ total, limit, offset, onPageChange }) {
           disabled={currentPage >= totalPages}
           className="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200"
         >
-          <Icons.ChevronRight />
+          ›
         </button>
         
         <div className="flex items-center gap-2 ml-3 pl-3 border-l border-gray-200">
@@ -91,6 +77,7 @@ function MainPagination({ total, limit, offset, onPageChange }) {
           />
         </div>
       </div>
+
       <div className="flex items-center gap-4 ml-6">
         <span className="text-sm text-gray-600 font-medium">
           {total.toLocaleString()} <span className="text-gray-400">records</span>
@@ -99,8 +86,9 @@ function MainPagination({ total, limit, offset, onPageChange }) {
           {offset + 1}–{Math.min(offset + limit, total)}
         </span>
       </div>
+
     </div>
   );
 }
 
-export default React.memo(MainPagination);
+export default React.memo(ErectedPagination);

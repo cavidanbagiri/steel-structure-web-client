@@ -6,8 +6,10 @@ import PublicRoute from '../components/auth/PublicRoute';
 
 import Auth from '../pages/Auth';
 import Dashboard from '../pages/Dashboard';
+import Combine from '../pages/Combine';
 import Main from '../pages/Main';
 import Transport from '../pages/Transport';
+import Erected from '../pages/Erected'
 
 
 const router = createBrowserRouter([
@@ -32,6 +34,14 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: '/home',
+        element: (
+          <ProtectedRoute>
+            <Combine />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: 'main',
         element: (
           <ProtectedRoute>
@@ -44,6 +54,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Transport />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'erected',
+        element: (
+          <ProtectedRoute>
+            <Erected />
           </ProtectedRoute>
         ),
       },

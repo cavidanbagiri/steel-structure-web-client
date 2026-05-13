@@ -1,6 +1,9 @@
 // src/pages/Main.jsx
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
+
+import { PanelLeftClose, PanelLeft, BarChart3 } from 'lucide-react';
+
 import {
   fetchMainData,
   setFilters,
@@ -13,10 +16,10 @@ import {
   selectMainFilters,
   selectColumnVisibility
 } from '../stores/main_slice';
-import MainStats from '../components/main/MainStats';
 import MainPagination from '../components/main/MainPagination';
 import MainTable from '../components/main/MainTable';
 import MainDetailModal from '../components/main/MainDetailModal';
+import MainStatistics from '../components/main/MainStatistics';
 
 const Icons = {
   Import: () => (
@@ -73,6 +76,8 @@ function Main() {
     mode: null,
     rowId: null,
   });
+
+  const [isStatsVisible, setIsStatsVisible] = useState(false);
 
   // Build stable filters key to prevent infinite re-fetching
   const filtersKey = useMemo(() => {
@@ -221,68 +226,117 @@ function Main() {
   }, [dispatch, pagination, filters]);
 
 
-
-
-  return (
-    <div className="min-h-screen bg-gray-50 py-6">
-      {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 px-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Main Data</h1>
-          {loading && (
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full">
-              <span className="text-indigo-500"><Icons.Loader /></span>
-              <span className="text-xs text-indigo-600 font-medium">Loading...</span>
-            </div>
-          )}
-        </div>
+   return (
+    <div className="flex flex-row min-h-screen bg-gray-50">
+      {/* Statistics Panel with slide animation */}
+      <div className={`
+        transition-all duration-300 ease-in-out
+        ${isStatsVisible ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0 absolute'}
+      `}>
+        <MainStatistics />
       </div>
 
-      <div className='mt-5'>
+      <div className="flex-1">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-4 px-6 py-6">
+          <div className="flex items-center gap-4">
+            {/* Toggle Button */}
+            <button
+              onClick={() => setIsStatsVisible(!isStatsVisible)}
+              className={`
+                group relative p-2.5 rounded-xl transition-all duration-300
+                ${isStatsVisible 
+                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-600' 
+                  : 'bg-white text-gray-500 hover:text-blue-600 hover:bg-blue-50 border-2 border-dashed border-gray-300 hover:border-blue-300'
+                }
+              `}
+              title={isStatsVisible ? 'Hide Statistics' : 'Show Statistics'}
+            >
+              {isStatsVisible ? (
+                <PanelLeftClose className="w-5 h-5 transition-transform group-hover:scale-110" />
+              ) : (
+                <>
+                  <PanelLeft className="w-5 h-5 transition-transform group-hover:scale-110" />
+                  {/* Pulsing dot to attract attention */}
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
+                </>
+              )}
+            </button>
 
-        {/* Top Pagination */}
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Main Data</h1>
+            
+            {loading && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full">
+                <span className="text-indigo-500"><Icons.Loader /></span>
+                <span className="text-xs text-indigo-600 font-medium">Loading...</span>
+              </div>
+            )}
+          </div>
+
+          {/* Optional: Quick stat indicator when panel is hidden */}
+          {!isStatsVisible && (
+            <button
+              onClick={() => setIsStatsVisible(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 
+                         rounded-xl text-sm font-medium text-gray-600 hover:text-blue-600 
+                         hover:border-blue-300 hover:shadow-md transition-all duration-200"
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Show Statistics</span>
+              <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+                Live
+              </span>
+            </button>
+          )}
+        </div>
+
+        <div className='mt-5'>
+          {/* Top Pagination */}
+          <MainPagination
+            total={pagination.total}
+            limit={pagination.limit}
+            offset={pagination.offset}
+            onPageChange={handlePageChange}
+          />
+        </div>
+
+        {/* Table */}
+        <MainTable
+          columns={ALL_COLUMNS}
+          columnVisibility={columnVisibility}
+          data={data}
+          loading={loading}
+          sortConfig={sortConfig}
+          filterValues={filterValues}
+          onToggleColumn={handleToggleColumn}
+          onResetColumns={handleResetColumns}
+          onSort={handleSort}
+          onFilterChange={handleFilterChange}
+          onFilterClear={handleFilterClear}
+          onRowAction={handleRowAction}
+        />
+
+        {/* Bottom Pagination */}
         <MainPagination
           total={pagination.total}
           limit={pagination.limit}
           offset={pagination.offset}
           onPageChange={handlePageChange}
         />
+        
+        {/* Modal */}
+        <MainDetailModal
+          mode={modalState.mode}
+          rowId={modalState.rowId}
+          isOpen={modalState.isOpen}
+          onClose={handleModalClose}
+          onSuccess={handleModalSuccess}
+        />
       </div>
-
-
-      {/* Table */}
-      <MainTable
-        columns={ALL_COLUMNS}
-        columnVisibility={columnVisibility}
-        data={data}
-        loading={loading}
-        sortConfig={sortConfig}
-        filterValues={filterValues}
-        onToggleColumn={handleToggleColumn}
-        onResetColumns={handleResetColumns}
-        onSort={handleSort}
-        onFilterChange={handleFilterChange}
-        onFilterClear={handleFilterClear}
-        onRowAction={handleRowAction}
-      />
-
-      {/* Bottom Pagination */}
-      <MainPagination
-        total={pagination.total}
-        limit={pagination.limit}
-        offset={pagination.offset}
-        onPageChange={handlePageChange}
-      />
-      {/* Modal */}
-      <MainDetailModal
-        mode={modalState.mode}
-        rowId={modalState.rowId}
-        isOpen={modalState.isOpen}
-        onClose={handleModalClose}
-        onSuccess={handleModalSuccess}   // ADD THIS
-      />
     </div>
   );
+
+  
 }
 
 export default Main;

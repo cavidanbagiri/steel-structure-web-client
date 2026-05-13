@@ -78,7 +78,7 @@ function MainTable({
   }, [data, sortConfig]);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+    <div className="bg-white border border-gray-200 overflow-hidden shadow-sm">
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>

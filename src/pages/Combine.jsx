@@ -216,13 +216,6 @@ function Combine() {
         </div>
       </div>
 
-      <CombineStats
-        total={pagination.total}
-        visibleColumnsCount={visibleColumnsCount}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        limit={pagination.limit}
-      />
 
       <CombinePagination
         total={pagination.total}

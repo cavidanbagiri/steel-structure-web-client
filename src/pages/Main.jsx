@@ -224,7 +224,7 @@ function Main() {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 space-y-5">
+    <div className="min-h-screen bg-gray-50 py-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-4 px-6">
         <div className="flex items-center gap-4">
@@ -236,23 +236,19 @@ function Main() {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all duration-200 text-sm font-medium shadow-sm">
-            <Icons.Import /> Import Data
-          </button>
-          <button className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 shadow-lg shadow-indigo-200 hover:shadow-indigo-300/50 transition-all duration-200 text-sm font-medium">
-            <Icons.Plus /> Add New
-          </button>
-        </div>
       </div>
 
-      {/* Top Pagination */}
-      <MainPagination
-        total={pagination.total}
-        limit={pagination.limit}
-        offset={pagination.offset}
-        onPageChange={handlePageChange}
-      />
+      <div className='mt-5'>
+
+        {/* Top Pagination */}
+        <MainPagination
+          total={pagination.total}
+          limit={pagination.limit}
+          offset={pagination.offset}
+          onPageChange={handlePageChange}
+        />
+      </div>
+
 
       {/* Table */}
       <MainTable

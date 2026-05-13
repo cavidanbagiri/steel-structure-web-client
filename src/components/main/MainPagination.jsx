@@ -41,7 +41,7 @@ function MainPagination({ total, limit, offset, onPageChange }) {
   };
 
   return (
-    <div className="flex items-center justify-start px-5 py-3 bg-white border-b-0 border-gray-200 rounded-xl shadow-sm flex-wrap gap-3">
+    <div className="flex items-center justify-start px-5 py-3 bg-gray-50 border border-b-0 border-gray-200  shadow-sm flex-wrap gap-3">
       
       <div className="flex items-center gap-2">
         <button

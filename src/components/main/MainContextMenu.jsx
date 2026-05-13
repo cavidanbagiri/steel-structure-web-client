@@ -1,5 +1,7 @@
 // src/components/main/MainContextMenu.jsx
-import React from 'react';
+import React, { useState } from 'react';
+
+import MessageBox from '../../layouts/MessageBox';
 
 const Icons = {
   Eye: () => (
@@ -42,6 +44,8 @@ const Icons = {
 function MainContextMenu({ x, y, rowId, onAction, onClose }) {
   const menuRef = React.useRef(null);
 
+  const [message, setMessage] = useState('')
+
   React.useEffect(() => {
     const handleClick = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -57,12 +61,24 @@ function MainContextMenu({ x, y, rowId, onAction, onClose }) {
     onClose();
   };
 
+  React.useEffect(()=>{
+    if(message){
+      setTimeout(()=>{
+        setMessage('')
+      }, 1800)
+    }
+  })
+
   return (
     <div
       ref={menuRef}
       className="fixed z-[100] w-48 bg-white border border-gray-200 rounded-xl shadow-2xl py-1.5"
       style={{ top: y, left: x }}
     >
+
+      <MessageBox msg={message}/>
+
+      
       <button
         onClick={() => handleAction('view')}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -76,20 +92,26 @@ function MainContextMenu({ x, y, rowId, onAction, onClose }) {
         <span className="text-gray-400"><Icons.Transport /></span> Transport
       </button>
       <button
-        onClick={() => handleAction('edit')}
+        onClick={() => {
+          setMessage("You dont have permission to Editing")
+        }}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <span className="text-gray-400"><Icons.Edit /></span> Edit
       </button>
       <button
-        onClick={() => handleAction('duplicate')}
+        onClick={() => {
+          setMessage("You dont have permission to Duplicating")
+        }}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <span className="text-gray-400"><Icons.Copy /></span> Duplicate
       </button>
       <div className="border-t border-gray-100 my-1" />
       <button
-        onClick={() => handleAction('delete')}
+        onClick={() => {
+          setMessage("You dont have permission to this deleting")
+        }}
         className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
       >
         <span className="text-red-400"><Icons.Trash /></span> Delete

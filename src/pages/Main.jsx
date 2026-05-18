@@ -16,8 +16,9 @@ import {
   selectMainPagination,
   selectMainFilters,
   selectColumnVisibility,
-  selectUniqueValues 
+  selectUniqueValues
 } from '../stores/main_slice';
+
 import MainPagination from '../components/main/MainPagination';
 import MainTable from '../components/main/MainTable';
 import MainDetailModal from '../components/main/MainDetailModal';
@@ -51,13 +52,13 @@ const ALL_COLUMNS = [
   { key: 'row_labels', label: 'Row Labels', sortable: true, filterable: true, filterType: 'text' },
   { key: 'item', label: 'Item', sortable: true, filterable: true, filterType: 'text' },
   { key: 'p_s', label: 'P/S', sortable: true, filterable: true, filterType: 'text' },
-  { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'range' },
-  { key: 'left_over_qty', label: 'Left Over', sortable: true, filterable: false, filterType: 'range' },  // NEW
+  { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'left_over_qty', label: 'Left Over', sortable: true, filterable: true, filterType: 'text' },  // NEW
   { key: 'description', label: 'Description', sortable: true, filterable: true, filterType: 'text' },
   { key: 'section', label: 'Section', sortable: true, filterable: true, filterType: 'text' },
-  { key: 'length', label: 'Length', sortable: true, filterable: true, filterType: 'range' },
-  { key: 'weight', label: 'Weight', sortable: true, filterable: true, filterType: 'range' },
-  { key: 'weight_total', label: 'Total Weight', sortable: true, filterable: true, filterType: 'range' },
+  { key: 'length', label: 'Length', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'weight', label: 'Weight', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'weight_total', label: 'Total Weight', sortable: true, filterable: true, filterType: 'text' },
   { key: 'dwgn', label: 'Drawing', sortable: true, filterable: true, filterType: 'text' },
 ];
 
@@ -92,48 +93,6 @@ function Main() {
     return JSON.stringify({ limit: pagination.limit, offset: pagination.offset, filters: activeFilters });
   }, [filters, pagination.limit, pagination.offset]);
 
-  // Fetch data when pagination or filters change
-  useEffect(() => {
-    const { filters: activeFilters, limit, offset } = JSON.parse(filtersKey);
-
-    // Build params matching backend expectations
-    const params = { limit, offset };
-
-    Object.keys(activeFilters).forEach(key => {
-      const value = activeFilters[key];
-      const column = ALL_COLUMNS.find(col => col.key === key);
-
-      if (column?.filterType === 'range') {
-        // For range filters, send min_* and max_*
-        if (value?.min !== undefined && value.min !== '') {
-          params[`min_${key}`] = value.min;
-        }
-        if (value?.max !== undefined && value.max !== '') {
-          params[`max_${key}`] = value.max;
-        }
-      } else if (key === 'search') {
-        params.search = value;
-      } else {
-        // For text filters, send as is
-        params[key] = value;
-      }
-    });
-
-    dispatch(fetchMainData(params));
-  }, [dispatch, filtersKey]);
-
-  // Sync Redux filters to local filterValues for display
-  useEffect(() => {
-    setFilterValues(prev => {
-      const updated = { ...prev };
-      Object.keys(filters).forEach(key => {
-        if (filters[key] !== null && filters[key] !== undefined) {
-          updated[key] = filters[key];
-        }
-      });
-      return updated;
-    });
-  }, [filters]);
 
   // Sorting
   const handleSort = useCallback((columnKey) => {
@@ -147,36 +106,9 @@ function Main() {
   }, []);
 
 
-  useEffect(() => {
-    const activeFilters = {};
-    Object.keys(filters).forEach(key => {
-      if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-        activeFilters[key] = filters[key];
-      }
-    });
-
-    const params = {
-      limit: pagination.limit,
-      offset: pagination.offset,
-      ...activeFilters,
-    };
-
-
-    dispatch(fetchMainData(params));
-  }, [dispatch, pagination.limit, pagination.offset, filters]);
-
-
-  // New Added
-  useEffect(() => {
-    dispatch(fetchUniqueValues('zone'));
-  }, [dispatch]);
-
   const zoneOptions = useSelector(state =>
     selectUniqueValues(state, 'zone')
   );
-
-
-
 
   const handleFilterChange = useCallback((columnKey, value) => {
     setFilterValues(prev => ({ ...prev, [columnKey]: value }));
@@ -241,7 +173,76 @@ function Main() {
   }, [dispatch, pagination, filters]);
 
 
-   return (
+  // Fetch data when pagination or filters change
+  useEffect(() => {
+    const { filters: activeFilters, limit, offset } = JSON.parse(filtersKey);
+
+    // Build params matching backend expectations
+    const params = { limit, offset };
+
+    Object.keys(activeFilters).forEach(key => {
+      const value = activeFilters[key];
+      const column = ALL_COLUMNS.find(col => col.key === key);
+
+      if (column?.filterType === 'range') {
+        // For range filters, send min_* and max_*
+        if (value?.min !== undefined && value.min !== '') {
+          params[`min_${key}`] = value.min;
+        }
+        if (value?.max !== undefined && value.max !== '') {
+          params[`max_${key}`] = value.max;
+        }
+      } else if (key === 'search') {
+        params.search = value;
+      } else {
+        // For text filters, send as is
+        params[key] = value;
+      }
+    });
+
+    dispatch(fetchMainData(params));
+  }, [dispatch, filtersKey]);
+
+  // Sync Redux filters to local filterValues for display
+  useEffect(() => {
+    setFilterValues(prev => {
+      const updated = { ...prev };
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== null && filters[key] !== undefined) {
+          updated[key] = filters[key];
+        }
+      });
+      return updated;
+    });
+  }, [filters]);
+
+
+  // useEffect(() => {
+  //   const activeFilters = {};
+  //   Object.keys(filters).forEach(key => {
+  //     if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
+  //       activeFilters[key] = filters[key];
+  //     }
+  //   });
+
+  //   const params = {
+  //     limit: pagination.limit,
+  //     offset: pagination.offset,
+  //     ...activeFilters,
+  //   };
+
+  //   dispatch(fetchMainData(params));
+  // }, [dispatch, pagination.limit, pagination.offset, filters]);
+
+
+  // New Added
+  useEffect(() => {
+    dispatch(fetchUniqueValues('zone'));
+  }, [dispatch]);
+
+
+
+  return (
     <div className="flex flex-row min-h-screen bg-gray-50">
       {/* Statistics Panel with slide animation */}
       <div className={`
@@ -260,8 +261,8 @@ function Main() {
               onClick={() => setIsStatsVisible(!isStatsVisible)}
               className={`
                 group relative p-2.5 rounded-xl transition-all duration-300
-                ${isStatsVisible 
-                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-600' 
+                ${isStatsVisible
+                  ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/25 hover:bg-blue-600'
                   : 'bg-white text-gray-500 hover:text-blue-600 hover:bg-blue-50 border-2 border-dashed border-gray-300 hover:border-blue-300'
                 }
               `}
@@ -279,7 +280,7 @@ function Main() {
             </button>
 
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Main Data</h1>
-            
+
             {loading && (
               <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-200 rounded-full">
                 <span className="text-indigo-500"><Icons.Loader /></span>
@@ -341,7 +342,7 @@ function Main() {
           offset={pagination.offset}
           onPageChange={handlePageChange}
         />
-        
+
         {/* Modal */}
         <MainDetailModal
           mode={modalState.mode}
@@ -354,7 +355,7 @@ function Main() {
     </div>
   );
 
-  
+
 }
 
 export default Main;

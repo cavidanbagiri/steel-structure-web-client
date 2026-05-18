@@ -153,16 +153,26 @@ const mainSlice = createSlice({
                 state.loading = true;
                 state.error = null;
             })
+            // .addCase(fetchMainData.fulfilled, (state, action) => {
+            //     state.loading = false;
+            //     // Handle response structure: { success: true, data: [], pagination: {}, filters_applied: {} }
+            //     state.data = action.payload.data || [];
+            //     if (action.payload.pagination) {
+            //         state.pagination = {
+            //             // total: action.payload.pagination.total || 0,
+            //             limit: action.payload.pagination.limit || 100,
+            //             // offset: action.payload.pagination.offset || 0
+            //         };
+            //     }
+            // })
             .addCase(fetchMainData.fulfilled, (state, action) => {
                 state.loading = false;
-                // Handle response structure: { success: true, data: [], pagination: {}, filters_applied: {} }
+
                 state.data = action.payload.data || [];
+
                 if (action.payload.pagination) {
-                    state.pagination = {
-                        total: action.payload.pagination.total || 0,
-                        limit: action.payload.pagination.limit || 100,
-                        offset: action.payload.pagination.offset || 0
-                    };
+                    state.pagination.total =
+                        action.payload.pagination.total || 0;
                 }
             })
             .addCase(fetchMainData.rejected, (state, action) => {

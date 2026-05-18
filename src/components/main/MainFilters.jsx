@@ -1,6 +1,8 @@
 // // src/components/main/MainFilters.jsx
 import React, { useEffect, useState } from 'react';
 
+import SearchableSelect from '../common/SearchableSelect';
+
 const Icons = {
   Search: () => (
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -28,46 +30,70 @@ function MainFilters({
     setLocalValue(filterValue || '');
   }, [filterValue]);
 
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      onChange(localValue);
-    }, 500);
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     onChange(localValue);
+  //   }, 500);
 
-    return () => clearTimeout(timeout);
-  }, [localValue]);
+  //   return () => clearTimeout(timeout);
+  // }, [localValue, onChange]);
+
+  useEffect(() => {
+  if (localValue === (filterValue || '')) return;
+
+  const timeout = setTimeout(() => {
+    onChange(localValue);
+  }, 500);
+
+  return () => clearTimeout(timeout);
+
+}, [localValue, filterValue, onChange]);
 
 
   // SELECT FILTER
-  if (column.filterType === 'select') {
-    return (
-      <div className="px-2 pb-2.5">
-        <div className="relative">
-          <select
-            value={filterValue || ''}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full h-8 px-2 bg-white border border-gray-300 rounded-sm text-xs text-gray-700 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
-          >
-            <option value="">All</option>
+  // if (column.filterType === 'select') {
+  //   return (
+  //     <div className="px-2 pb-2.5">
+  //       <div className="relative">
+  //         <select
+  //           value={filterValue || ''}
+  //           onChange={(e) => onChange(e.target.value)}
+  //           className="w-full h-8 px-2 bg-white border border-gray-300 rounded-sm text-xs text-gray-700 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
+  //         >
+  //           <option value="">All</option>
 
-            {options.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+  //           {options.map((option) => (
+  //             <option key={option} value={option}>
+  //               {option}
+  //             </option>
+  //           ))}
+  //         </select>
 
-          {filterValue && (
-            <button
-              onClick={onClear}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-            >
-              <Icons.X />
-            </button>
-          )}
-        </div>
-      </div>
-    );
-  }
+  //         {filterValue && (
+  //           <button
+  //             onClick={onClear}
+  //             className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+  //           >
+  //             <Icons.X />
+  //           </button>
+  //         )}
+  //       </div>
+  //     </div>
+  //   );
+  // }
+  // SELECT FILTER
+if (column.filterType === 'select') {
+  return (
+    <div className="px-2 pb-2.5">
+      <SearchableSelect
+        value={filterValue}
+        options={options}
+        placeholder={`Select ${column.label}`}
+        onChange={onChange}
+      />
+    </div>
+  );
+}
 
   // TEXT FILTER
   return (
@@ -95,6 +121,8 @@ function MainFilters({
             <Icons.X />
           </button>
         )}
+
+        
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ function ErectedFilters({ column, filterValue, onChange, onClear }) {
           placeholder="Filter..."
           value={filterValue || ''}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-8 pl-9 pr-8 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
+          className="w-full h-8 pl-9 pr-8 bg-white border border-gray-300 rounded-sm text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
         />
         {filterValue && (
           <button

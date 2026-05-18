@@ -1,5 +1,5 @@
-// src/components/main/MainFilters.jsx
-import React from 'react';
+// // src/components/main/MainFilters.jsx
+import React, { useEffect, useState } from 'react';
 
 const Icons = {
   Search: () => (
@@ -14,59 +14,79 @@ const Icons = {
   ),
 };
 
-function MainFilters({ column, filterValue, onChange, onClear }) {
-  // For numeric columns, show min/max range inputs
-  // if (column.filterType === 'range') {
-  //   const minValue = filterValue?.min || '';
-  //   const maxValue = filterValue?.max || '';
-    
-  //   return (
-  //     <div className="px-2 pb-2.5 flex gap-1.5">
-  //       <div className="relative flex-1">
-  //         <input
-  //           type="number"
-  //           placeholder="Min"
-  //           value={minValue}
-  //           onChange={(e) => onChange({ ...filterValue, min: e.target.value })}
-  //           className="w-full h-8 px-2 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
-  //         />
-  //       </div>
-  //       <span className="text-gray-300 text-xs flex items-center">–</span>
-  //       <div className="relative flex-1">
-  //         <input
-  //           type="number"
-  //           placeholder="Max"
-  //           value={maxValue}
-  //           onChange={(e) => onChange({ ...filterValue, max: e.target.value })}
-  //           className="w-full h-8 px-2 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
-  //         />
-  //       </div>
-  //       {(minValue || maxValue) && (
-  //         <button
-  //           onClick={onClear}
-  //           className="p-1.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
-  //         >
-  //           <Icons.X />
-  //         </button>
-  //       )}
-  //     </div>
-  //   );
-  // }
+function MainFilters({
+  column,
+  filterValue,
+  options = [],
+  onChange,
+  onClear
+}) {
 
-  // For text columns, show single text input
+  const [localValue, setLocalValue] = useState(filterValue || '');
+
+  useEffect(() => {
+    setLocalValue(filterValue || '');
+  }, [filterValue]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      onChange(localValue);
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [localValue]);
+
+
+  // SELECT FILTER
+  if (column.filterType === 'select') {
+    return (
+      <div className="px-2 pb-2.5">
+        <div className="relative">
+          <select
+            value={filterValue || ''}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full h-8 px-2 bg-white border border-gray-300 rounded-sm text-xs text-gray-700 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
+          >
+            <option value="">All</option>
+
+            {options.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+
+          {filterValue && (
+            <button
+              onClick={onClear}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <Icons.X />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // TEXT FILTER
   return (
     <div className="px-2 pb-2.5">
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
           <Icons.Search />
         </span>
+
         <input
           type="text"
           placeholder="Filter..."
-          value={filterValue || ''}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full h-8 pl-9 pr-8 bg-white border border-gray-300 rounded-lg text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          // value={filterValue || ''}
+          // onChange={(e) => onChange(e.target.value)}
+          className="w-full h-8 pl-9 pr-8 bg-white border border-gray-300 rounded-sm text-xs text-gray-700 placeholder-gray-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-50 outline-none transition-all duration-200"
         />
+
         {filterValue && (
           <button
             onClick={onClear}

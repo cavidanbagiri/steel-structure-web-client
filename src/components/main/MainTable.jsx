@@ -44,6 +44,7 @@ function MainTable({
   loading,
   sortConfig,
   filterValues,
+  filterOptions,
   onToggleColumn,
   onResetColumns,
   onSort,
@@ -92,11 +93,11 @@ function MainTable({
                 />
               </th>
               {visibleColumns.map(column => (
-                <th key={column.key} className="bg-gray-50 sticky top-0 z-10 px-2 py-0">
+                <th key={column.key} className="bg-gray-50 sticky top-0 z-10  py-0">
                   <div className="flex flex-col">
                     <div
                       onClick={() => column.sortable && onSort(column.key)}
-                      className={`flex items-center gap-1.5 px-3 pt-3.5 pb-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider select-none ${
+                      className={`flex items-center gap-1.5 px-2 pt-3.5 pb-2.5 text-xs font-semibold text-gray-500 uppercase tracking-wider select-none ${
                         column.sortable ? 'cursor-pointer hover:text-gray-700' : ''
                       }`}
                     >
@@ -112,9 +113,16 @@ function MainTable({
                       )}
                     </div>
                     {column.filterable && (
+                      // <MainFilters
+                      //   column={column}
+                      //   filterValue={filterValues[column.key]}
+                      //   onChange={(value) => onFilterChange(column.key, value)}
+                      //   onClear={() => onFilterClear(column.key)}
+                      // />
                       <MainFilters
                         column={column}
                         filterValue={filterValues[column.key]}
+                        options={filterOptions?.[column.key] || []}
                         onChange={(value) => onFilterChange(column.key, value)}
                         onClear={() => onFilterClear(column.key)}
                       />

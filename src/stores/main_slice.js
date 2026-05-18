@@ -216,7 +216,11 @@ export const selectMainError = (state) => state.main.error;
 export const selectMainPagination = (state) => state.main.pagination;
 export const selectMainFilters = (state) => state.main.filters;
 export const selectMainStatistics = (state) => state.main.statistics;
-export const selectUniqueValues = (state, columnName) => state.main.uniqueValues[columnName] || [];
+// export const selectUniqueValues = (state, columnName) => state.main.uniqueValues[columnName] || [];
+const EMPTY_ARRAY = [];
+
+export const selectUniqueValues = (state, columnName) =>
+    state.main.uniqueValues[columnName] || EMPTY_ARRAY;
 export const selectColumnVisibility = (state) => state.main.columnVisibility;
 
 export default mainSlice.reducer;

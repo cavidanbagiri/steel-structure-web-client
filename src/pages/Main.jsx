@@ -6,6 +6,7 @@ import { PanelLeftClose, PanelLeft, BarChart3 } from 'lucide-react';
 
 import {
   fetchMainData,
+  fetchUniqueValues,
   setFilters,
   setPagination,
   toggleColumn,
@@ -14,7 +15,8 @@ import {
   selectMainLoading,
   selectMainPagination,
   selectMainFilters,
-  selectColumnVisibility
+  selectColumnVisibility,
+  selectUniqueValues 
 } from '../stores/main_slice';
 import MainPagination from '../components/main/MainPagination';
 import MainTable from '../components/main/MainTable';
@@ -44,13 +46,13 @@ const Icons = {
 const ALL_COLUMNS = [
   { key: 'id', label: 'ID', sortable: true, filterable: false },
   { key: 'area', label: 'Area', sortable: true, filterable: true, filterType: 'text' },
-  { key: 'zone', label: 'Zone', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'zone', label: 'Zone', sortable: true, filterable: true, filterType: 'select' },
   { key: 'key', label: 'Key', sortable: true, filterable: true, filterType: 'text' },
   { key: 'row_labels', label: 'Row Labels', sortable: true, filterable: true, filterType: 'text' },
   { key: 'item', label: 'Item', sortable: true, filterable: true, filterType: 'text' },
   { key: 'p_s', label: 'P/S', sortable: true, filterable: true, filterType: 'text' },
   { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'range' },
-  { key: 'left_over_qty', label: 'Left Over', sortable: true, filterable: true, filterType: 'range' },  // NEW
+  { key: 'left_over_qty', label: 'Left Over', sortable: true, filterable: false, filterType: 'range' },  // NEW
   { key: 'description', label: 'Description', sortable: true, filterable: true, filterType: 'text' },
   { key: 'section', label: 'Section', sortable: true, filterable: true, filterType: 'text' },
   { key: 'length', label: 'Length', sortable: true, filterable: true, filterType: 'range' },
@@ -162,6 +164,19 @@ function Main() {
 
     dispatch(fetchMainData(params));
   }, [dispatch, pagination.limit, pagination.offset, filters]);
+
+
+  // New Added
+  useEffect(() => {
+    dispatch(fetchUniqueValues('zone'));
+  }, [dispatch]);
+
+  const zoneOptions = useSelector(state =>
+    selectUniqueValues(state, 'zone')
+  );
+
+
+
 
   const handleFilterChange = useCallback((columnKey, value) => {
     setFilterValues(prev => ({ ...prev, [columnKey]: value }));
@@ -308,6 +323,9 @@ function Main() {
           loading={loading}
           sortConfig={sortConfig}
           filterValues={filterValues}
+          filterOptions={{
+            zone: zoneOptions
+          }}
           onToggleColumn={handleToggleColumn}
           onResetColumns={handleResetColumns}
           onSort={handleSort}

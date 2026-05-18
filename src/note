@@ -2,18 +2,13 @@
 Problems:
 
 1) In Transport Table, shows the select-option instead of text-input
-2) In transport, dont need to get all unique values, 
 3) From transport to erected will worked
 4) Shows the erected data as transport
 5) Fix context menu for transport table
 6) Check the filters for transport
 7) After opening an item in transport modal, l see the data error. need to fix it
 8) During insert data from mains to transport, the weight show as .9f but must be .1f
-9) Solve the Combine data design problem
-10) Solve the transport page, pagination problem
+9) Fix the Filter option, especially date
 
 Today Working
-5
-
-
-
+9

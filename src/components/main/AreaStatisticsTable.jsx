@@ -180,8 +180,8 @@ function AreaStatisticsTable({ data }) {
   // Mini Progress Bar for the combined view
   const CombinedProgressBar = ({ transport, erected }) => {
     return (
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between">
+      <div className="">
+        {/* <div className="flex items-center justify-between">
           <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Transport</span>
           <span className="text-[10px] font-bold text-blue-600">{transport.toFixed(1)}%</span>
         </div>
@@ -191,10 +191,10 @@ function AreaStatisticsTable({ data }) {
           <span className="text-[10px] font-medium text-gray-500 uppercase tracking-wider">Erected</span>
           <span className="text-[10px] font-bold text-violet-600">{erected.toFixed(1)}%</span>
         </div>
-        <ProgressBar value={erected} color="violet" size="sm" />
+        <ProgressBar value={erected} color="violet" size="sm" /> */}
         
         {/* Overall progress indicator */}
-        <div className="mt-2 pt-2 border-t border-gray-100">
+        <div className=" border-t border-gray-100">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">Overall</span>
             <span className="text-[10px] font-bold text-gray-900">
@@ -203,7 +203,7 @@ function AreaStatisticsTable({ data }) {
           </div>
           <div className="mt-1 h-1 bg-gray-100 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-gray-600 to-gray-900 rounded-full transition-all duration-1000"
+              className="h-full bg-gradient-to-r from-green-500 to-green-700 rounded-full transition-all duration-1000"
               style={{ width: `${Math.min((transport + erected) / 2, 100)}%` }}
             />
           </div>
@@ -373,7 +373,7 @@ function AreaStatisticsTable({ data }) {
                     </div>
                   </td>
                   
-                  <td className="px-4 py-4 min-w-[250px]">
+                  <td className="px-4 py-4 min-w-[220px]">
                     <CombinedProgressBar 
                       transport={item._progress.transport} 
                       erected={item._progress.erected} 

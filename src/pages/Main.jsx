@@ -290,7 +290,7 @@ function Main() {
           )}
         </div>
 
-        <div className='mt-5'>
+        <div className=''>
           {/* Top Pagination */}
           <MainPagination
             total={pagination.total}

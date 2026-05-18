@@ -53,7 +53,7 @@ function MainStatistics() {
   return (
     <>
       {/* MessageBox for notifications */}
-      <MessageBox
+      {/* <MessageBox
         msg={message}
         cond={messageType}
         onClose={() => {
@@ -62,7 +62,7 @@ function MainStatistics() {
         }}
         autoClose={true}
         duration={2000}
-      />
+      /> */}
 
       <div style={{fontFamily:'Roboto'}} className="flex flex-col w-[50vw] min-w-[500px] max-w-[800px] h-screen bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden mx-2">
         {/* Header */}
@@ -170,7 +170,7 @@ function MainStatistics() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-1 py-6 space-y-6">
           {loading && !data ? (
             // Loading skeleton
             <div className="space-y-4">

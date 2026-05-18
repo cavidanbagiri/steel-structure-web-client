@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, createSelector  } from '@reduxjs/toolkit';
 import TransportService from "../services/TransportService";
 
 // Async Thunks
@@ -160,11 +160,11 @@ const transportSlice = createSlice({
             state.currentPage = 0;
         },
 
-        // Set pagination
+        
         setPagination: (state, action) => {
-            state.limit = action.payload.limit || state.limit;
-            state.offset = action.payload.offset || state.offset;
-            state.currentPage = action.payload.page || state.currentPage;
+            if (action.payload.limit !== undefined) state.limit = action.payload.limit;
+            if (action.payload.offset !== undefined) state.offset = action.payload.offset;
+            if (action.payload.page !== undefined) state.currentPage = action.payload.page;
         },
 
         // Next page
@@ -323,19 +323,52 @@ export const selectCurrentItem = (state) => state.transport.currentItem;
 export const selectTransportLoading = (state) => state.transport.loading;
 export const selectTransportError = (state) => state.transport.error;
 export const selectTransportTotal = (state) => state.transport.total;
-export const selectTransportFilters = (state) => state.transport.filters;
-export const selectPagination = (state) => ({
-    limit: state.transport.limit,
-    offset: state.transport.offset,
-    total: state.transport.total,
-    hasMore: state.transport.hasMore,
-    currentPage: state.transport.currentPage
-});
+export const selectTransportFilters = (state) => state.transport.filters
+// export const selectPagination = (state) => ({
+//     limit: state.transport.limit,
+//     offset: state.transport.offset,
+//     total: state.transport.total,
+//     hasMore: state.transport.hasMore,
+//     currentPage: state.transport.currentPage
+// });
+export const selectTransportLimit = (state) => state.transport.limit;
+export const selectTransportOffset = (state) => state.transport.offset;
+export const selectTransportHasMore = (state) => state.transport.hasMore;
+export const selectTransportCurrentPage = (state) => state.transport.currentPage;
 export const selectFilterOptions = (state) => state.transport.filterOptions;
-export const selectImportStatus = (state) => ({
-    importing: state.transport.importing,
-    importResult: state.transport.importResult
-});
+export const selectImporting = (state) => state.transport.importing;
+export const selectImportResult = (state) => state.transport.importResult;
+
+// export const selectImportStatus = (state) => ({
+//     importing: state.transport.importing,
+//     importResult: state.transport.importResult
+// });
+
+
+export const selectPagination = createSelector(
+    [
+        selectTransportLimit,
+        selectTransportOffset,
+        selectTransportTotal,
+        selectTransportHasMore,
+        selectTransportCurrentPage,
+    ],
+    (limit, offset, total, hasMore, currentPage) => ({
+        limit,
+        offset,
+        total,
+        hasMore,
+        currentPage,
+    })
+);
+
+export const selectImportStatus = createSelector(
+    [selectImporting, selectImportResult],
+    (importing, importResult) => ({
+        importing,
+        importResult,
+    })
+);
 
 // Export reducer
 export default transportSlice.reducer;

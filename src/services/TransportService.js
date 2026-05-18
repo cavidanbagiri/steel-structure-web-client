@@ -44,7 +44,7 @@ class TransportService {
     // Get all unique values for multiple columns (for filter initialization)
     async getFilterOptions() {
         try {
-            const columns = ['structure_1', 'structure_2', 'area', 'location', 't_status', 'mark_name'];
+            const columns = ['structure_1', 'area', 'location', 't_status',];
             const promises = columns.map(column =>
                 this.getUniqueValues(column).then(res => ({ [column]: res[column] }))
             );

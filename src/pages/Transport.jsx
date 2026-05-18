@@ -151,9 +151,15 @@ function Transport() {
     dispatch(setFilters({ [key]: null }));
   }, [dispatch]);
 
+  // const handlePageChange = useCallback((page) => {
+  //   dispatch(setPagination({ offset: (page - 1) * pagination.limit, page: page - 1 }));
+  // }, [dispatch, pagination.limit]);
+
   const handlePageChange = useCallback((page) => {
+    console.log('The page is-1 ', page)
+    console.log('The page is-2 ', pagination.limit)
     dispatch(setPagination({ offset: (page - 1) * pagination.limit, page: page - 1 }));
-  }, [dispatch, pagination.limit]);
+}, [dispatch, pagination.limit]);
 
   const handleToggleColumn = useCallback((key) => {
     setColumnVisibility(prev => ({ ...prev, [key]: !prev[key] }));

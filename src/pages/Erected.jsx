@@ -60,7 +60,6 @@ function Erected() {
   const pagination = useSelector(selectErectedPagination);
   const filters = useSelector(selectErectedFilters);
 
-  console.log('the pagination 2 is ', pagination)
   
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [localFilters, setLocalFilters] = useState({});
@@ -153,7 +152,6 @@ function Erected() {
 
   const currentPage = Math.floor(pagination.offset / pagination.limit) + 1;
   const totalPages = Math.ceil(pagination.total / pagination.limit) || 1;
-  console.log('pagination is ', pagination)
   const visibleColumnsCount = ALL_COLUMNS.filter(c => columnVisibility[c.key]).length;
 
   return (

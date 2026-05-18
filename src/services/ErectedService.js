@@ -5,7 +5,6 @@ class ErectedService {
     async fetchErectedData(params = {}) {
         try {
             const response = await $api.get("/erected/fetch_erected_data", { params });
-            console.log('response ereced', response.data)
             return response.data;
         } catch (error) {
             throw error.response?.data || error.message;

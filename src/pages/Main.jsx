@@ -49,7 +49,7 @@ const ALL_COLUMNS = [
   { key: 'area', label: 'Area', sortable: true, filterable: true, filterType: 'text' },
   { key: 'zone', label: 'Zone', sortable: true, filterable: true, filterType: 'select' },
   { key: 'key', label: 'Key', sortable: true, filterable: true, filterType: 'text' },
-  { key: 'row_labels', label: 'Row Labels', sortable: true, filterable: true, filterType: 'text' },
+  { key: 'row_labels', label: 'Row Labels', sortable: true, filterable: true, filterType: 'select' },
   { key: 'item', label: 'Item', sortable: true, filterable: true, filterType: 'text' },
   { key: 'p_s', label: 'P/S', sortable: true, filterable: true, filterType: 'text' },
   { key: 'qty', label: 'Qty', sortable: true, filterable: true, filterType: 'text' },
@@ -108,6 +108,10 @@ function Main() {
 
   const zoneOptions = useSelector(state =>
     selectUniqueValues(state, 'zone')
+  );
+
+  const row_labelsOptions = useSelector(state =>
+    selectUniqueValues(state, 'row_labels')
   );
 
   const handleFilterChange = useCallback((columnKey, value) => {
@@ -217,27 +221,10 @@ function Main() {
   }, [filters]);
 
 
-  // useEffect(() => {
-  //   const activeFilters = {};
-  //   Object.keys(filters).forEach(key => {
-  //     if (filters[key] !== null && filters[key] !== undefined && filters[key] !== '') {
-  //       activeFilters[key] = filters[key];
-  //     }
-  //   });
-
-  //   const params = {
-  //     limit: pagination.limit,
-  //     offset: pagination.offset,
-  //     ...activeFilters,
-  //   };
-
-  //   dispatch(fetchMainData(params));
-  // }, [dispatch, pagination.limit, pagination.offset, filters]);
-
-
   // New Added
   useEffect(() => {
     dispatch(fetchUniqueValues('zone'));
+    dispatch(fetchUniqueValues('row_labels'));
   }, [dispatch]);
 
 
@@ -325,7 +312,8 @@ function Main() {
           sortConfig={sortConfig}
           filterValues={filterValues}
           filterOptions={{
-            zone: zoneOptions
+            zone: zoneOptions,
+            row_labels: row_labelsOptions 
           }}
           onToggleColumn={handleToggleColumn}
           onResetColumns={handleResetColumns}

@@ -8,6 +8,7 @@ export const fetchErectedData = createAsyncThunk(
     async (params = {}, { rejectWithValue }) => {
         try {
             const response = await ErectedService.fetchErectedData(params);
+            console.log('the erected response from slice is ', response)
             return response;
         } catch (error) {
             return rejectWithValue(error);
@@ -102,7 +103,11 @@ const erectedSlice = createSlice({
             })
             .addCase(fetchErectedData.fulfilled, (state, action) => {
                 state.loading = false;
+                console.log('actio payload data ', action.payload)
                 state.data = action.payload.data || [];
+                state.pagination.limit = action.payload.pagination.limit
+                state.pagination.total = action.payload.pagination.total
+
             })
             .addCase(fetchErectedData.rejected, (state, action) => {
                 state.loading = false;

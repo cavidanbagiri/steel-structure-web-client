@@ -14,7 +14,7 @@ function TransportPagination({ total, limit, offset, onPageChange }) {
 
   const getPageNumbers = () => {
     const pages = [];
-    const maxVisible = 5;
+    const maxVisible = 15;
     let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
     let end = Math.min(totalPages, start + maxVisible - 1);
     if (end - start + 1 < maxVisible) {
@@ -27,7 +27,7 @@ function TransportPagination({ total, limit, offset, onPageChange }) {
   };
 
   return (
-    <div className="flex items-center justify-start px-5 py-3 bg-white border border-gray-200 rounded-xl shadow-sm flex-wrap gap-3">
+    <div className="flex items-center justify-start px-5 py-3 bg-gray-50 border border-b-0 border-gray-200  shadow-sm flex-wrap gap-3">
       
       <div className="flex items-center gap-2">
         <button
